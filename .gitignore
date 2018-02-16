@@ -1,0 +1,14 @@
+Centrifuge/
+Data/
+Kaiju/
+MetaTrans/
+ReferenceSequences/
+
+!Centrifuge/Runs/SnakefileCentrifuge_Flexi
+!Centrifuge/Runs/2041_SnakeCentrifugeConfig.yml
+!Centrifuge/Runs/2706_SnakeCentrifugeConfig.yml
+!Python_Scripts/kreport_combineSp_args.py
+!Python_Scripts/Unmapped_Count.py
+
+
+

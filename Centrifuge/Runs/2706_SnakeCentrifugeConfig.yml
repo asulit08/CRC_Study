@@ -1,0 +1,17 @@
+sampledir: "/home/arielle/CRC_Study/Data/Unmapped_from_star/"
+singlesdir: "/home/arielle/CRC_Study/Data/Unmapped_from_star/Singles"
+outputdir: "Centrifuge_Output"
+db_dir: "/home/arielle/CRC_Study/Centrifuge/Database_Files/DB/{db}_DB"
+logdir: "Centrifuge_Output/{db}/{sample}/logs"
+
+##Inputs -- pattern may change based on input fastq files
+
+Pattern1: "{sample}.merged.unmapped.mate1.fq"
+Pattern2: "{sample}.merged.unmapped.mate2.fq"
+Singles:  "{sample}_singletons_Unmapped.out.mate1"
+
+##Outputs:
+
+classification: "{sample}.{db}.classification"
+report: "{sample}.{db}.report.tsv"
+kreport: "{sample}.{db}.kreport"

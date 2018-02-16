@@ -1,0 +1,68 @@
+import glob, os, os.path, re
+from os.path import join
+
+configfile: "2041_SnakeCentrifugeConfig.yml"
+##configfile: "2706_SnakeCentrifugeConfig.yml"
+
+SAMPLEDIR = config["sampledir"]
+SINGLESDIR = config["singlesdir"]
+OUTPUTDIR = config["outputdir"]
+DB_DIR = config["db_dir"]
+LOG = config["logdir"]
+
+Read1 = config["Pattern1"]
+Read2 = config["Pattern2"]
+Single = config["Singles"]
+
+OutClass = config["classification"]
+OutReport = config["report"]
+OutKreport = config["kreport"]
+
+OutSuffix = ["classification", "report.tsv", "kreport"]
+
+SAMPLES, = glob_wildcards(join(SAMPLEDIR, '{Samples, \d+-\d+-\d+-\d+}'))
+Samples=list(set(SAMPLES))
+DATABASE, = glob_wildcards(DB_DIR)
+
+rule all:
+    input:
+        expand("{dir}/{db}/{sample}/{sample}.{db}.{output}", dir=OUTPUTDIR, sample=Samples, db=DATABASE, output=OutSuffix)
+
+rule centrifuge:
+    input:
+        PE1=join(SAMPLEDIR, join("{sample}", Read1)),
+        PE2=join(SAMPLEDIR, join("{sample}", Read2)),
+        singletons=join(SINGLESDIR, Single)
+
+    params:
+        index=join(DB_DIR, "{db}"),
+        un_conc=join(LOG, "{sample}.Un."),
+        un=join(LOG, "{sample}.Un.Single")
+
+    log:
+        out=join(LOG, "{sample}.class.stdout"),
+        err=join(LOG, "{sample}.class.stderr")
+
+    output:
+        join(OUTPUTDIR, join("{db}", join("{sample}", OutClass))), join(OUTPUTDIR, join("{db}", join("{sample}", OutReport)))
+    
+    threads: 8
+    
+    shell:
+        "nice /home/arielle/miniconda3/envs/Centrifuge_Snake2/centrifuge/centrifuge -p {threads} -x {params.index} -1 {input.PE1} -2 {input.PE2} -U {input.singletons} --un {params.un} --un-conc {params.un_conc} -S {output[0]} --report-file {output[1]} 1> {log.out} 2> {log.err}"
+
+rule kreport:
+    input: 
+        join(OUTPUTDIR, join("{db}", join("{sample}", OutClass)))
+
+    params:
+        index=join(DB_DIR, "{db}")
+
+    log:
+        err=join(LOG, "{sample}.kreport.stderr")
+    
+    output:
+        join(OUTPUTDIR, join("{db}", join("{sample}", OutKreport)))
+    
+    shell:
+        "nice /home/arielle/miniconda3/envs/Centrifuge_Snake2/centrifuge/centrifuge-kreport -x {params.index} {input} > {output} 2> {log.err}"
