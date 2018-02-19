@@ -8,12 +8,12 @@ import argparse
 from os.path import splitext
 import pandas as pd
 
-UnmappedReadCount=argparse.ArgumentParser(description="output readcounts of sample inputs to centrifuge")
+UnmappedReadCount=argparse.ArgumentParser(description="output read counts of sample inputs to centrifuge")
 
 UnmappedReadCount.add_argument("dir1", help="one directory containing the input files")
 UnmappedReadCount.add_argument("dir2", help="2nd directory containing the input files")
-UnmappedReadCount.add_argument("combined_kreport", help="Initial Combined Kreport from Centrifuge outputs")
-UnmappedReadCount.add_argument("outfile", help="output containing tables of Taxon IDs and Read Counts")
+UnmappedReadCount.add_argument("Unclassed_Root_CountsFile", help="File containing counts of unclassed and total root from Kreports of Centrifuge outputs")
+UnmappedReadCount.add_argument("outfile", help="output containing tables of the total Read Counts")
 
 args=UnmappedReadCount.parse_args()
 
@@ -80,13 +80,15 @@ for file2 in path2:
 for key in Read_Counts_Dict:
     Read_Counts_Dict[key]=[sum(Read_Counts_Dict[key])]
 
-Read_Counts_Dict['TaxonName']=['Read_Count']
+#Read_Counts_Dict['TaxonName']=['Read_Count']
 
 ReadCounts_df=pd.DataFrame(Read_Counts_Dict)
-print(ReadCounts_df)
+#print(ReadCounts_df)
 
-Kreport=pd.read_csv(args.combined_kreport)
+ReadCounts_trans=ReadCounts_df.T
 
-ConcatenatedFinal = pd.concat([ReadCounts_df,Kreport], axis=0)
+Kreport=pd.read_csv(args.Unclassed_Root_CountsFile, sep='\t', index_col=0)
+
+ConcatenatedFinal = pd.concat([ReadCounts_trans,Kreport], axis=1)
 
 ConcatenatedFinal.to_csv(args.outfile)
